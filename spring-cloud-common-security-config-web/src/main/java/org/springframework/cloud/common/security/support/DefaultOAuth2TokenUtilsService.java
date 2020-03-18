@@ -15,13 +15,17 @@
  */
 package org.springframework.cloud.common.security.support;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.AbstractOAuth2Token;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -32,6 +36,7 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultOAuth2TokenUtilsService implements OAuth2TokenUtilsService {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultOAuth2TokenUtilsService.class);
 	private final OAuth2AuthorizedClientService oauth2AuthorizedClientService;
 
 	public DefaultOAuth2TokenUtilsService(OAuth2AuthorizedClientService oauth2AuthorizedClientService) {
@@ -63,8 +68,16 @@ public class DefaultOAuth2TokenUtilsService implements OAuth2TokenUtilsService {
 			final OAuth2AuthorizedClient oauth2AuthorizedClient = this.getAuthorizedClient(oauth2AuthenticationToken);
 			accessTokenOfAuthenticatedUser = oauth2AuthorizedClient.getAccessToken().getTokenValue();
 		}
+		else if (authentication instanceof JwtAuthenticationToken) {
+			AbstractOAuth2Token token = (AbstractOAuth2Token) authentication.getCredentials();
+			accessTokenOfAuthenticatedUser = token.getTokenValue();
+			logger.info("XXXXXXXXXXXXXXXXX {}", accessTokenOfAuthenticatedUser);
+		// 	JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken)authentication;
+		// 	final OAuth2AuthorizedClient oauth2AuthorizedClient = this.getAuthorizedClient(jwtAuthenticationToken);
+		// 	accessTokenOfAuthenticatedUser = oauth2AuthorizedClient.getAccessToken().getTokenValue();
+		}
 		else {
-			throw new IllegalStateException("Authentication object is not of type OAuth2AuthenticationToken.");
+			throw new IllegalStateException("Authentication object is not of type OAuth2AuthenticationToken, was " + authentication);
 		}
 
 		return accessTokenOfAuthenticatedUser;
