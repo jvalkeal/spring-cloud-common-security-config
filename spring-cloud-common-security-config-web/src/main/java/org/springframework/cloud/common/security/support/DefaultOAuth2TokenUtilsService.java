@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.common.security.support;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,7 +34,6 @@ import org.springframework.util.StringUtils;
  */
 public class DefaultOAuth2TokenUtilsService implements OAuth2TokenUtilsService {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultOAuth2TokenUtilsService.class);
 	private final OAuth2AuthorizedClientService oauth2AuthorizedClientService;
 
 	public DefaultOAuth2TokenUtilsService(OAuth2AuthorizedClientService oauth2AuthorizedClientService) {
@@ -71,13 +68,9 @@ public class DefaultOAuth2TokenUtilsService implements OAuth2TokenUtilsService {
 		else if (authentication instanceof JwtAuthenticationToken) {
 			AbstractOAuth2Token token = (AbstractOAuth2Token) authentication.getCredentials();
 			accessTokenOfAuthenticatedUser = token.getTokenValue();
-			logger.info("XXXXXXXXXXXXXXXXX {}", accessTokenOfAuthenticatedUser);
-		// 	JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken)authentication;
-		// 	final OAuth2AuthorizedClient oauth2AuthorizedClient = this.getAuthorizedClient(jwtAuthenticationToken);
-		// 	accessTokenOfAuthenticatedUser = oauth2AuthorizedClient.getAccessToken().getTokenValue();
 		}
 		else {
-			throw new IllegalStateException("Authentication object is not of type OAuth2AuthenticationToken, was " + authentication);
+			throw new IllegalStateException("Unsupported authentication object type " + authentication);
 		}
 
 		return accessTokenOfAuthenticatedUser;
